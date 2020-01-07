@@ -69,10 +69,41 @@ class ImagesController extends Controller
         $filenamewoex = pathinfo($originalfilename, PATHINFO_FILENAME);
         $extension = pathinfo($originalfilename, PATHINFO_EXTENSION);
         $filename = date("YmdHis").$filenamewoex.md5(Auth::id()) . "." . $extension;
+        if (isset($exif['Orientation'])) {
+          $file = imagecreatefromstring(file_get_contents($file));
+          // imagerotate($im, 270, 0);
+          switch ($exif['Orientation']) {
+            case 1: //no rotate
+              break;
+            case 2: //FLIP_HORIZONTAL
+              imageflip($file, IMG_FLIP_HORIZONTAL);
+              break;
+            case 3: //ROTATE 180
+              $file = imagerotate($file, 180, 0);
+              break;
+            case 4: //FLIP_VERTICAL
+              imageflip($file, IMG_FLIP_VERTICAL);
+              break;
+            case 5: //ROTATE 270 FLIP_HORIZONTAL
+              $file = imagerotate($file, 270, 0);
+              imageflip($file, IMG_FLIP_HORIZONTAL);
+              break;
+            case 6: //ROTATE 90
+              $file = imagerotate($file, 270, 0);
+              break;
+            case 7: //ROTATE 90 FLIP_HORIZONTAL
+              $file = imagerotate($file, 90, 0);
+              imageflip($photo, IMG_FLIP_HORIZONTAL);
+              break;
+            case 8: //ROTATE 270
+              $file = imagerotate($file, 90, 0);
+              break;
+          }
+        }
         $photo = \Image::make($file)
-          ->resize(300, null, function ($constraint) {
+          ->resize(1000, null, function ($constraint) {
           $constraint->aspectRatio();
-        })->encode('jpg',80);
+        })->encode('jpg',90);
         // $file->storeAs('public/upload', $filename);
         Storage::disk('public')->put('/upload/'.$filename, $photo);
         $image                = new Photo;
@@ -115,10 +146,42 @@ class ImagesController extends Controller
         $filenamewoex = pathinfo($originalfilename, PATHINFO_FILENAME);
         $extension = pathinfo($originalfilename, PATHINFO_EXTENSION);
         $filename = date("YmdHis").$filenamewoex.md5(Auth::id()) . "." . $extension;
-        // $photo = Image::make($file)
-        //   ->resize(300, null, function ($constraint) {
-        //   $constraint->aspectRatio();
-        // });
+                if (isset($exif['Orientation'])) {
+          $file = imagecreatefromstring(file_get_contents($file));
+          // imagerotate($im, 270, 0);
+          switch ($exif['Orientation']) {
+            case 1: //no rotate
+              break;
+            case 2: //FLIP_HORIZONTAL
+              imageflip($file, IMG_FLIP_HORIZONTAL);
+              break;
+            case 3: //ROTATE 180
+              $file = imagerotate($file, 180, 0);
+              break;
+            case 4: //FLIP_VERTICAL
+              imageflip($file, IMG_FLIP_VERTICAL);
+              break;
+            case 5: //ROTATE 270 FLIP_HORIZONTAL
+              $file = imagerotate($file, 270, 0);
+              imageflip($file, IMG_FLIP_HORIZONTAL);
+              break;
+            case 6: //ROTATE 90
+              $file = imagerotate($file, 270, 0);
+              break;
+            case 7: //ROTATE 90 FLIP_HORIZONTAL
+              $file = imagerotate($file, 90, 0);
+              imageflip($photo, IMG_FLIP_HORIZONTAL);
+              break;
+            case 8: //ROTATE 270
+              $file = imagerotate($file, 90, 0);
+              break;
+          }
+        }
+
+        $photo = \Image::make($file)
+          ->resize(1000, null, function ($constraint) {
+          $constraint->aspectRatio();
+        })->encode('jpg',90);
 
         // $path = Storage::disk('s3')->putFileAs('/public/upload', $file, $filename ,'public');
         Storage::disk('s3')->putFileAs('/public/upload', $file, $filename ,'public');
