@@ -22,7 +22,7 @@ class RegisterController extends Controller
     $activation->code = Uuid::uuid4();
     $activation->save();
     Mail::to($activation->email)->send(new ActivationCreated($activation));
-    return response()->json('aaa');
+    return response()->json('');
   }
 
   public function activate(Request $request) {

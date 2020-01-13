@@ -29,8 +29,9 @@ class FamilyactivationCreated extends Mailable
    */
   public function build()
   {
-    $frontendURL = "http://localhost:3000";
-    return $this->subject('アカウント有効化メール')
+    $frontendURL = "http://www.photoalbum.com.s3-website-ap-northeast-1.amazonaws.com";
+    return $this->from('hello@example.com','PhotoAlbum')
+    ->subject('アカウント有効化メール')
     ->markdown('emails.familyactivations.created')
     ->with([
       'link' => $frontendURL."/familyverify/?code={$this->activation->code}"

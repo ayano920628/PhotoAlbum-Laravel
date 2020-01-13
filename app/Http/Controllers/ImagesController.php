@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use App\Photo;
 use App\User;
@@ -21,19 +22,12 @@ class ImagesController extends Controller
 
   public function index()
   {
-    if ( app()->isLocal() || app()->runningUnitTests() ) {
-      // .env に APP_ENV=local (ローカル環境) または APP_ENV=testing (テスト環境) と書いてある場合
-      // テスト環境, ローカル環境用の記述
-      $user = User::find(Auth::id());
-      if ($user->family_id){
-        $family = Family::find($user->family_id);
-        return Photo::where('user_id', $family->user1)->orWhere('user_id', $family->user2)->orderBy('created_at', 'asc')->get();
-      } else {
-        return Photo::where('user_id', Auth::id())->orderBy('created_at', 'asc')->get();
-      }
+    $user = User::find(Auth::id());
+    if ($user->family_id){
+      $family = Family::find($user->family_id);
+      return Photo::where('user_id', $family->user1)->orWhere('user_id', $family->user2)->orderBy('created_at', 'asc')->get();
     } else {
-      // .env に APP_ENV=production (本番環境) などと書いてあった場合
-      // 本番環境用の記述
+      return Photo::where('user_id', Auth::id())->orderBy('created_at', 'asc')->get();
     }
   }
 
@@ -182,10 +176,9 @@ class ImagesController extends Controller
           ->resize(1000, null, function ($constraint) {
           $constraint->aspectRatio();
         })->encode('jpg',90);
-
-        // $path = Storage::disk('s3')->putFileAs('/public/upload', $file, $filename ,'public');
-        Storage::disk('s3')->putFileAs('/public/upload', $file, $filename ,'public');
-
+        Storage::disk('s3')->put('/upload/'.$filename, $photo);
+        // $path = Storage::disk('s3')->putFileAs('/public/upload', $photo, $filename ,'public');
+        // Storage::disk('s3')->putFileAs('/public/upload', $photo, $filename ,'public');
         $image                = new Photo;
         $image->user_id       = Auth::id();
         $image->img_name      = $filename;
@@ -202,9 +195,6 @@ class ImagesController extends Controller
 
   public function show(Photo $image)
   {
-    if ( app()->isLocal() || app()->runningUnitTests() ) {
-      // .env に APP_ENV=local (ローカル環境) または APP_ENV=testing (テスト環境) と書いてある場合
-      // テスト環境, ローカル環境用の記述
       $user = User::find(Auth::id());
       if ($user->family_id){
         $family = Family::find($user->family_id);
@@ -216,11 +206,6 @@ class ImagesController extends Controller
           return $image;
         }
       }
-    } else {
-      // .env に APP_ENV=production (本番環境) などと書いてあった場合
-      // 本番環境用の記述
-    }
-
   }
 
   /**
@@ -232,31 +217,23 @@ class ImagesController extends Controller
    */
   public function update(Request $request, Photo $image)
   {
-    // if ( app()->isLocal() || app()->runningUnitTests() ) {
-    // .env に APP_ENV=local (ローカル環境) または APP_ENV=testing (テスト環境) と書いてある場合
-    // テスト環境, ローカル環境用の記述
-      $user = User::find(Auth::id());
-      if ($user->family_id){
-        $family = Family::find($user->family_id);
-        if ($image->user_id === $family->user1 || $image->user_id === $family->user2) {
-            $image->img_comment_1 = $request->img_comment_1;
-            $image->img_comment_2 = $request->img_comment_2;
-          $image->save();
-          return $image;
-        }
-      } else {
-        if ($image->user_id === $user->id) {
-            $image->img_comment_1 = $request->img_comment_1;
-            $image->img_comment_2 = $request->img_comment_2;
-          $image->save();
-          return $image;
-        }
+    $user = User::find(Auth::id());
+    if ($user->family_id){
+      $family = Family::find($user->family_id);
+      if ($image->user_id === $family->user1 || $image->user_id === $family->user2) {
+          $image->img_comment_1 = $request->img_comment_1;
+          $image->img_comment_2 = $request->img_comment_2;
+        $image->save();
+        return $image;
       }
-    // } else {
-      // .env に APP_ENV=production (本番環境) などと書いてあった場合
-      // 本番環境用の記述
-    // }
-
+    } else {
+      if ($image->user_id === $user->id) {
+          $image->img_comment_1 = $request->img_comment_1;
+          $image->img_comment_2 = $request->img_comment_2;
+        $image->save();
+        return $image;
+      }
+    }
   }
 
   /**
@@ -267,6 +244,8 @@ class ImagesController extends Controller
    */
   public function destroy(Photo $image)
   {
+    // .env に APP_ENV=local (ローカル環境) または APP_ENV=testing (テスト環境) と書いてある場合
+    // テスト環境, ローカル環境用の記述
     if ( app()->isLocal() || app()->runningUnitTests() ) {
       $user = User::find(Auth::id());
       if ($user->family_id){
@@ -284,22 +263,22 @@ class ImagesController extends Controller
         }
       }
     } else {
+      // .env に APP_ENV=production (本番環境) などと書いてあった場合
+      // 本番環境用の記述
       $user = User::find(Auth::id());
       if ($user->family_id){
         $family = Family::find($user->family_id);
         if ($image->user_id === $family->user1 || $image->user_id === $family->user2) {
           $filename = $image->img_name;
           $disk = Storage::disk('s3');
-          $disk->delete('public/upload/'.$filename);
-          // Storage::delete('public/upload/'.$filename);
+          $disk->delete('/upload/'.$filename);
           $image->delete();
         }
       } else {
         if ($image->user_id === $user->id) {
           $filename = $image->img_name;
           $disk = Storage::disk('s3');
-          $disk->delete('public/upload/'.$filename);
-          // Storage::delete('public/upload/'.$filename);
+          $disk->delete('/upload/'.$filename);
           $image->delete();
         }
       }

@@ -30,8 +30,9 @@ class ActivationCreated extends Mailable
    */
   public function build()
   {
-    $frontendURL = "http://localhost:3000";
-    return $this->subject('アカウント有効化メール')
+    $frontendURL = "http://www.photoalbum.com.s3-website-ap-northeast-1.amazonaws.com";
+    return $this->from('hello@example.com','PhotoAlbum')
+    ->subject('アカウント有効化メール')
     ->markdown('emails.activations.created')
     ->with([
       'link' => $frontendURL."/verify/?code={$this->activation->code}"
