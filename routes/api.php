@@ -24,6 +24,7 @@ Route::post('activate', 'RegisterController@activate');
 // CRUDのURI自動設定される
 Route::apiResource('images', 'ImagesController');
 Route::apiResource('albums', 'AlbumsController');
+Route::apiResource('voices', 'VoicesController');
 
 Route::post('familyregister', 'FamilyregisterController@register');
 Route::post('familyactivate', 'FamilyregisterController@activate');

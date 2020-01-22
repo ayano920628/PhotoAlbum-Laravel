@@ -25,9 +25,9 @@ class ImagesController extends Controller
     $user = User::find(Auth::id());
     if ($user->family_id){
       $family = Family::find($user->family_id);
-      return Photo::where('user_id', $family->user1)->orWhere('user_id', $family->user2)->orderBy('created_at', 'asc')->get();
+      return Photo::where('user_id', $family->user1)->orWhere('user_id', $family->user2)->orderBy('taken', 'desc')->get();
     } else {
-      return Photo::where('user_id', Auth::id())->orderBy('created_at', 'asc')->get();
+      return Photo::where('user_id', Auth::id())->orderBy('taken', 'desc')->get();
     }
   }
 
