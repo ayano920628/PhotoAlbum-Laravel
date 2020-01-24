@@ -55,7 +55,7 @@ class VoicesController extends Controller
     } else {
       // .env に APP_ENV=production (本番環境) などと書いてあった場合
       // 本番環境用の記述
-      $file = $request->album_name;
+      $file = $request->voice_name;
       if( !empty($file) ){
         $originalfilename = $file->getClientOriginalName();
         setlocale(LC_ALL, 'ja_JP.UTF-8');
