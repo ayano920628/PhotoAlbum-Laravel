@@ -1,8 +1,6 @@
 @component('mail::message')
-# Introduction
 
-# 招待！
-# 新規登録していただきありがとうございます！
+# 招待メールです！
 下記のリンクをクリックしてアカウントの有効化を行ってください。
 
 @component('mail::button', ['url' => $link])
