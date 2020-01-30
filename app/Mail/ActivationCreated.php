@@ -30,6 +30,7 @@ class ActivationCreated extends Mailable
    */
   public function build()
   {
+    // 反映されていない？
     $frontendURL = "https://www.mymemoryphoto.com";
     return $this->from('hello@example.com','MyMemory')
     ->subject('アカウント有効化メール')
